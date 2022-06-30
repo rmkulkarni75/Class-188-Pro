@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="shaders/pnoise.js"></script>
+    <script src="shaders/fragmentTexture.js"></script>
+    <title>AFrame shader example with noise vertex displacement shader and textured fragment shader</title>
+
+    <script>
+      var vShader = pnoise3;
+      var fShader = fragmentTexture;
+      
+      AFRAME.registerShader("vertex-displacement-and-texture-shader", {
+        schema: {
+          u_time: { type: "number", is: "uniform", default: 1.0 },
+          timeMsec: { type: "time", is: "uniform" },
+          uMap: {type: 'map', is: 'uniform'}
+        },
+        raw: false,
+        vertexShader: vShader,
+        fragmentShader: fShader
+      });
+      
+       
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <a-entity oculus-touch-controls="hand: left"></a-entity>
+      <a-entity oculus-touch-controls="hand: right"></a-entity>
+
+      <a-sky
+        src="https://cdn.glitch.com/6cd24866-2086-438e-8da5-5ab5e75a5a7b%2Fstars_texture.jpg?v=1596487305133"
+      ></a-sky>
+
+      <a-sphere
+        material="shader:vertex-displacement-and-texture-shader; uMap: https://cdn.glitch.com/6cd24866-2086-438e-8da5-5ab5e75a5a7b%2Fmoon-texture.jpg?v=1596486900480"
+        scale="1 1 1"
+        radius="0.2"
+        position="0 1.6 -0.3"
+        segments-height="42"
+        segments-width="42"
+      >
+        <a-animation
+          attribute="scale"
+          direction="alternate-reverse"
+          dur="5000"
+          from="1 1 1"
+          to="4 4 4"
+          repeat="indefinite"
+        ></a-animation>
+      </a-sphere>
+    </a-scene>
+  </body>
+</html>

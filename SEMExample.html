@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <title>Jamie's first A-Frame</title>
+
+    <script>
+      var vShader = `
+        varying vec2 vN;
+
+        void main() {
+
+          vec4 p = vec4( position, 1. );
+
+          vec3 e = normalize( vec3( modelViewMatrix * p ) );
+          vec3 n = normalize( normalMatrix * normal );
+
+          vec3 r = reflect( e, n );
+          float m = 2. * sqrt(
+            pow( r.x, 2. ) +
+            pow( r.y, 2. ) +
+            pow( r.z + 1., 2. )
+          );
+          vN = r.xy / m + .5;
+
+          gl_Position = projectionMatrix * modelViewMatrix * p;
+
+        }
+
+      `;
+      
+      var fShader = `
+        uniform sampler2D uMap;
+
+        varying vec2 vN;
+
+        void main() {
+
+          vec3 base = texture2D( uMap, vN ).rgb;
+          gl_FragColor = vec4( base, 1. );
+
+        }
+      `;
+
+      AFRAME.registerShader("SEM-shader", {
+        schema: {
+          uMap: {type: 'map', is: 'uniform'}
+        },
+        raw: false,
+        vertexShader: vShader,
+        fragmentShader: fShader
+      });
+
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <a-entity oculus-touch-controls="hand: left"></a-entity>
+      <a-entity oculus-touch-controls="hand: right"></a-entity>
+
+      <a-sky
+        src="https://cdn.glitch.com/6cd24866-2086-438e-8da5-5ab5e75a5a7b%2Fbackyard-hdr-360.jpg?v=1597191984699"
+      ></a-sky>
+
+      <a-torus-knot 
+          position="0 1.6 -3.3"
+          material="shader:SEM-shader;uMap:https://cdn.glitch.com/6cd24866-2086-438e-8da5-5ab5e75a5a7b%2Fbackyard-hdr-360.jpg?v=1597191984699"
+          arc="180" 
+          p="2" 
+          q="3"
+          radius="1"
+          animation="property: rotation; to: 0 360 360; loop: true; easing: linear; dur: 10000"
+          radius-tubular="0.2">
+
+      </a-torus-knot>
+      
+    </a-scene>
+  </body>
+</html>

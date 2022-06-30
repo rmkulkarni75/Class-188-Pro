@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <title>Jamie's first A-Frame</title>
+
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css" />
+
+    <!-- import the webpage's javascript file -->
+    <script src="/script.js" defer></script>
+
+    <script>
+      AFRAME.registerComponent("rotate-moon", {
+        init: function() {},
+        tick: function() {
+          let rotation = this.el.getAttribute("rotation");
+          rotation.y += 0.1;
+          this.el.setAttribute("rotation", rotation);
+        }
+      });
+
+      
+      var vShader = `
+        precision mediump float;
+        varying vec2 v_uv;
+        uniform float u_time;
+
+        void main() {
+           v_uv = uv;
+           vec3 st = vec3(position);
+           st.x = position.x + sin(0.01*u_time)*0.25;
+           st.y = position.y;
+           st.z = position.z;
+           gl_Position = projectionMatrix * modelViewMatrix *    vec4(st, 1.0);
+        }
+      `;
+
+      var fShader= `
+        // Use medium precision.
+        precision mediump float;
+
+
+        uniform float u_time;
+
+        void main() {
+
+            vec3 color = vec3(0.);
+            color = vec3(1.0,abs(sin(3.14*u_time*0.99)),1.0);
+            gl_FragColor = vec4(color,1.0);
+        }
+
+      `;
+      
+      AFRAME.registerShader("custom-material-shader", {
+        schema: {
+          u_time: { type: "number", is: "uniform", default: 1.0 }
+        },
+        raw: false,
+        vertexShader:vShader,
+        fragmentShader:fShader,
+      });
+      
+      AFRAME.registerComponent("animate-material", {
+              
+        init: function() {
+          this.u_time = 0;
+        },
+
+        tick: function(t, dt) {
+          this.u_time++;
+          this.el.setAttribute("material", "u_time", this.u_time);
+        }
+        
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <a-entity oculus-touch-controls="hand: left"></a-entity>
+      <a-entity oculus-touch-controls="hand: right"></a-entity>
+
+      <a-sky
+        src="https://cdn.glitch.com/6cd24866-2086-438e-8da5-5ab5e75a5a7b%2Fstars_texture.jpg?v=1596487305133"
+      ></a-sky>
+
+      <a-sphere
+        rotate-moon
+        material="shader:custom-material-shader"
+        animate-material
+        radius="2"
+        segments-height="53"
+        position="0 2 -5"
+      ></a-sphere>
+    </a-scene>
+  </body>
+</html>
